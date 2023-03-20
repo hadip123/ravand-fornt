@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:taskify/start/start_page.dart';
+import 'package:taskify/firstStart/firstStart_page.dart';
 import 'package:taskify/theme.dart';
 
 void main() {
@@ -9,6 +9,6 @@ void main() {
     theme: ThemeData(
         fontFamily: FontSettings.family,
         colorScheme: const ColorScheme.light(primary: darkNord3)),
-    home: const Start(),
+    home: const FirstStart(),
   ));
 }

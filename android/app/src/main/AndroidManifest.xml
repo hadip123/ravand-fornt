@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.taskify">
+    package="ir.hipoo.ravand">
    <application
-        android:label="taskify"
+        android:label="Ravand"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

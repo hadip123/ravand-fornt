@@ -3,30 +3,42 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:taskify/theme.dart';
 
 class MyBottomNavigationBar extends StatefulWidget {
-  const MyBottomNavigationBar({super.key});
+  void Function(int index) changeSelection;
+  bool white;
+  MyBottomNavigationBar(
+      {super.key, required this.changeSelection, required this.white});
 
   @override
-  _MyBottomNavigationBarState createState() => _MyBottomNavigationBarState();
+  _MyBottomNavigationBarState createState() =>
+      _MyBottomNavigationBarState(changeSelection, white);
 }
 
 class _MyBottomNavigationBarState extends State<MyBottomNavigationBar> {
   int _selectedIndex = 0;
+  bool white;
+
   static const List<Widget> _widgetOptions = <Widget>[
     Text('Home'),
     Text('Search'),
     Text('Profile'),
   ];
 
+  _MyBottomNavigationBarState(this.changeSelection, this.white);
+
+  void Function(int index) changeSelection;
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
+
+    changeSelection(index);
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: darkNord2,
+      color: _selectedIndex != 0 ? Colors.white : darkNord2,
       child: Container(
         height: 60,
         decoration: const BoxDecoration(
@@ -83,7 +95,7 @@ class _MyBottomNavigationBarState extends State<MyBottomNavigationBar> {
               ],
             ),
             AnimatedPositioned(
-              duration: const Duration(milliseconds: 100),
+              duration: const Duration(milliseconds: 200),
               curve: Curves.easeInOut,
               left: (MediaQuery.of(context).size.width / 3) *
                       (_selectedIndex + 1) -
