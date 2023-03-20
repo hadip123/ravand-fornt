@@ -65,18 +65,26 @@ class _FirstStartState extends State<FirstStart> {
             ),
             const Spacer(),
             ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20)),
-                    fixedSize: Size(size.width / 1.5, 50)),
-                onPressed: () {
-                  Navigator.push(
-                      context, MaterialPageRoute(builder: (_) => Login()));
-                },
-                child: const Text(
-                  'رایگان شروع کن',
-                  style: TextStyle(fontSize: 18),
-                )),
+              style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20)),
+                  fixedSize: Size(size.width / 1.5, 50)),
+              onPressed: () {
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (_) => const Login()));
+              },
+              child: Row(
+                children: const [
+                  Icon(Icons.chevron_left),
+                  Spacer(),
+                  Text(
+                    'رایگان شروع کن',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+                  ),
+                  Spacer(),
+                ],
+              ),
+            ),
             const Spacer(),
           ],
         ),
