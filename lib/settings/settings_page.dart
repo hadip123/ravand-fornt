@@ -75,62 +75,56 @@ class _SettingsState extends State<Settings> {
         ));
   }
 
-  ListView buildSettingsList() {
-    return ListView(
-      shrinkWrap: true,
-      children: [
-        SetttingsItem(
-          title: "اهداف",
-          icon: Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: SvgPicture.asset(
-              'assets/goal.svg',
-              color: Colors.orange[800],
+  Widget buildSettingsList() {
+    final Size size = MediaQuery.of(context).size;
+    return SizedBox(
+      height: 300,
+      child: ListView(
+        children: [
+          SetttingsItem(
+            title: "آرشیو برنامه های من",
+            icon: Icon(
+              Icons.archive,
+              color: Colors.red[900],
             ),
+            color: Colors.red,
+            onTap: () {},
           ),
-          color: Colors.orange,
-          onTap: () {},
-        ),
-        const SizedBox(
-          height: 20,
-        ),
-        SetttingsItem(
-          title: "آمار من",
-          icon: Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: SvgPicture.asset(
-              'assets/PersonSimpleRun.svg',
-              color: Colors.deepPurple[800],
+          const SizedBox(
+            height: 20,
+          ),
+          SetttingsItem(
+            title: "درباره ما",
+            icon: Icon(
+              Icons.info,
+              color: Colors.blue[900],
             ),
+            color: Colors.blue,
+            onTap: () {
+              final dialog = AboutDialog(
+                applicationIcon: SvgPicture.asset(
+                  'assets/logo.svg',
+                  width: 70,
+                  height: 70,
+                ),
+                applicationName: 'Ravand',
+                applicationVersion: '0.1 beta',
+                children: const [
+                  Text(
+                    'Hipoo™',
+                    style: TextStyle(fontSize: 30),
+                  ),
+                  Text('Developers:\nM.Hadi Pahlevand, Mohammad Langari'),
+                  Text('Website: hipoo.ir'),
+                  Text('School: Shahid-Beheshti HighSchool')
+                ],
+              );
+
+              showDialog(context: context, builder: (_) => dialog);
+            },
           ),
-          color: Colors.deepPurple,
-          onTap: () {},
-        ),
-        const SizedBox(
-          height: 20,
-        ),
-        SetttingsItem(
-          title: "پلن های ذخیره شده",
-          icon: Icon(
-            Icons.save,
-            color: Colors.red[900],
-          ),
-          color: Colors.red,
-          onTap: () {},
-        ),
-        const SizedBox(
-          height: 20,
-        ),
-        SetttingsItem(
-          title: "تنظیمات",
-          icon: Icon(
-            Icons.settings,
-            color: Colors.blue[900],
-          ),
-          color: Colors.blue,
-          onTap: () {},
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -172,10 +166,10 @@ class _SettingsState extends State<Settings> {
         SizedBox(
           width: size.width * .1,
         ),
-        Column(
+        const Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
+          children: [
             Text(
               'تاریخ عضویت',
               style: TextStyle(fontWeight: FontWeight.w200),
@@ -217,19 +211,22 @@ class SetttingsItem extends StatelessWidget {
           decoration: BoxDecoration(color: color[50], shape: BoxShape.circle),
           height: 50,
           child: icon),
-      trailing: Container(
-        width: 50,
-        decoration: BoxDecoration(
-            color: Colors.blueGrey[50],
-            borderRadius: BorderRadius.circular(10)),
-        height: 50,
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Transform.rotate(
-            angle: 3.15,
-            child: SvgPicture.asset(
-              'assets/Chevron Right.svg',
-              color: Colors.blueGrey,
+      trailing: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: 50,
+          decoration: BoxDecoration(
+              color: Colors.blueGrey[50],
+              borderRadius: BorderRadius.circular(10)),
+          height: 50,
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Transform.rotate(
+              angle: 3.15,
+              child: SvgPicture.asset(
+                'assets/Chevron Right.svg',
+                color: Colors.blueGrey,
+              ),
             ),
           ),
         ),

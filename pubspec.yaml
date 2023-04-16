@@ -37,6 +37,15 @@ dependencies:
   cupertino_icons: ^1.0.2
   flutter_svg: ^2.0.4
   percent_indicator: ^4.2.3
+  device_info_plus: ^8.1.0
+  http: ^0.13.5
+  shared_preferences: ^2.1.0
+  wheel_chooser: ^1.1.2
+  dio: ^5.1.1
+  jalali_calendar: ^1.0.4
+  shamsi_date: ^1.0.1
+  timelines: ^0.1.0
+  time_range: ^1.1.0
 
 dev_dependencies:
   flutter_test:

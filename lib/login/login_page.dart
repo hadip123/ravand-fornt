@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:taskify/components/login_input.dart';
+import 'package:taskify/home/home_page.dart';
 import 'package:taskify/signup/signup_page.dart';
 import 'package:taskify/theme.dart';
 
@@ -82,13 +83,16 @@ class _LoginState extends State<Login> {
 
   ElevatedButton buildContinueButton(Size size) {
     return ElevatedButton(
-      onPressed: () {},
+      onPressed: () {
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (_) => const Home()));
+      },
       style: ElevatedButton.styleFrom(
           fixedSize: Size(size.width - 100, 45),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(30))),
-      child: Row(
-        children: const [
+      child: const Row(
+        children: [
           Icon(Icons.chevron_left),
           Spacer(),
           Text(

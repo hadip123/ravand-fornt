@@ -22,7 +22,7 @@ class _FirstStartState extends State<FirstStart> {
           children: [
             Container(
               width: double.infinity,
-              height: 380,
+              height: size.height * .3 + 100,
               decoration: const BoxDecoration(
                   color: darkNord1,
                   borderRadius:
@@ -70,11 +70,11 @@ class _FirstStartState extends State<FirstStart> {
                       borderRadius: BorderRadius.circular(20)),
                   fixedSize: Size(size.width / 1.5, 50)),
               onPressed: () {
-                Navigator.push(
+                Navigator.pushReplacement(
                     context, MaterialPageRoute(builder: (_) => const Login()));
               },
-              child: Row(
-                children: const [
+              child: const Row(
+                children: [
                   Icon(Icons.chevron_left),
                   Spacer(),
                   Text(

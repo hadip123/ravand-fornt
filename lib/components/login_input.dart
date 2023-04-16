@@ -8,6 +8,7 @@ class LoginInput extends StatelessWidget {
       required this.hint,
       required this.controller,
       required this.label,
+      this.dir = TextDirection.ltr,
       required this.isHidden});
 
   final Size size;
@@ -15,6 +16,7 @@ class LoginInput extends StatelessWidget {
   final String label;
   final String hint;
   final bool isHidden;
+  final TextDirection dir;
   final TextEditingController controller;
 
   @override
@@ -40,6 +42,7 @@ class LoginInput extends StatelessWidget {
                 controller: controller,
                 obscureText: isHidden,
                 keyboardType: type,
+                textDirection: dir,
                 decoration: InputDecoration(
                   hintStyle: const TextStyle(fontSize: 12),
                   hintText: hint,
