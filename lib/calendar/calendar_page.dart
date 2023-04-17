@@ -56,12 +56,6 @@ class _CalendarState extends State<Calendar> {
         foregroundColor: Colors.white,
       ),
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text('برنامه امروزت'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        elevation: 0,
-      ),
       body: FutureBuilder(
           future: getPlans(),
           builder: (_, snapshot) {
@@ -79,6 +73,9 @@ class _CalendarState extends State<Calendar> {
                   width: double.infinity,
                   child: Column(
                     children: [
+                      const SizedBox(
+                        height: 20,
+                      ),
                       Text(
                         numberToPersian(
                             'برنامه ${jl.year}/${jl.month}/${jl.day}'),

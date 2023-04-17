@@ -34,6 +34,16 @@ class _GeneratePlanState extends State<GeneratePlan> {
     return Directionality(
         textDirection: TextDirection.rtl,
         child: Scaffold(
+          floatingActionButton: FloatingActionButton(
+            backgroundColor: darkNord2,
+            foregroundColor: Colors.white,
+            onPressed: () {
+              Map data = {};
+              print(blockedTimes);
+              print(tasks);
+            },
+            child: const Icon(Icons.create),
+          ),
           appBar: AppBar(title: const Text('ساخت برنامه')),
           body: ListView(
             children: [
@@ -41,7 +51,10 @@ class _GeneratePlanState extends State<GeneratePlan> {
                 height: 10,
               ),
               ListTile(
-                leading: const Icon(Icons.block),
+                leading: const CircleAvatar(
+                    backgroundColor: Colors.transparent,
+                    foregroundColor: lightNord4,
+                    child: Icon(Icons.block)),
                 trailing: const Icon(Icons.plus_one),
                 onTap: () {
                   setState(() {
@@ -69,9 +82,25 @@ class _GeneratePlanState extends State<GeneratePlan> {
                                   children: blockedTimes
                                       .map((e) => ListTile(
                                             title: Text(e['name']),
-                                            leading:
-                                                const Icon(Icons.timelapse),
+                                            leading: const CircleAvatar(
+                                                backgroundColor:
+                                                    Colors.transparent,
+                                                foregroundColor: darkNord1,
+                                                child: Icon(Icons.timelapse)),
                                             iconColor: darkNord3,
+                                            trailing: IconButton(
+                                              icon: const Icon(
+                                                Icons.delete,
+                                                color: Colors.red,
+                                              ),
+                                              onPressed: () {
+                                                final int index =
+                                                    blockedTimes.indexOf(e);
+                                                setState(() {
+                                                  blockedTimes.removeAt(index);
+                                                });
+                                              },
+                                            ),
                                             subtitle: Text(numberToPersian(
                                                 '${e['start']} تا ${e['end']}')),
                                           ))
@@ -199,7 +228,10 @@ class _GeneratePlanState extends State<GeneratePlan> {
                     : null,
               ),
               ListTile(
-                leading: const Icon(Icons.task),
+                leading: const CircleAvatar(
+                    backgroundColor: Colors.transparent,
+                    foregroundColor: lightNord4,
+                    child: Icon(Icons.task)),
                 onTap: () {
                   setState(() {
                     isTasksOpen = !isTasksOpen;
@@ -227,8 +259,11 @@ class _GeneratePlanState extends State<GeneratePlan> {
                                   children: tasks
                                       .map((e) => ListTile(
                                             title: Text(e['name']),
-                                            leading:
-                                                const Icon(Icons.timelapse),
+                                            leading: const CircleAvatar(
+                                                backgroundColor:
+                                                    Colors.transparent,
+                                                foregroundColor: darkNord1,
+                                                child: Icon(Icons.timelapse)),
                                             iconColor: darkNord3,
                                             subtitle: Text(numberToPersian(
                                                 'حداقل زمان مورد نیاز: ${e['minLen']}\nمیزان اهمیت از ۲۰: ${e['importance']}')),
@@ -347,7 +382,10 @@ class _GeneratePlanState extends State<GeneratePlan> {
                     : null,
               ),
               ListTile(
-                leading: const Icon(Icons.timelapse),
+                leading: const CircleAvatar(
+                    backgroundColor: Colors.transparent,
+                    foregroundColor: lightNord4,
+                    child: Icon(Icons.timelapse)),
                 trailing: const Icon(Icons.settings),
                 onTap: () {
                   AlertDialog dialog = AlertDialog(

@@ -21,15 +21,15 @@ class _SignupState extends State<Signup> with SingleTickerProviderStateMixin {
   void initState() {
     _shakeController = ShakeController(vsync: this);
     pages = [
+      SignUpStep3(
+        nextStep: nextStep,
+        pervStep: pervStep,
+      ),
       SignUpStep1(
         nextStep: nextStep,
         pervStep: pervStep,
       ),
       SignUpStep2(
-        nextStep: nextStep,
-        pervStep: pervStep,
-      ),
-      SignUpStep3(
         nextStep: nextStep,
         pervStep: pervStep,
       ),

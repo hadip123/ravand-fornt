@@ -1,13 +1,26 @@
-import 'dart:convert';
-
-import 'package:http/http.dart';
+import 'package:dio/dio.dart';
 import 'package:taskify/universal/universal.dart';
 
-Future<Response> signUp(Map data) async {
-  print(jsonEncode(data));
-  return await post(Uri.parse(getUrl('/auth/signup')), body: data);
+bool validateEmail(String email) {
+  final domain = RegExp('@(.+)').firstMatch(email)?.group(1);
+
+  final validEmailDomains = {'hotmail.com', 'outlook.com', 'gmail.com'};
+
+  return validEmailDomains.contains(domain);
 }
 
-Future<Response> verifyEmail(Map data) async {
-  return await post(Uri.parse(getUrl('/auth/signup/f')), body: data);
+bool validatePassword(String password) {
+  if (password.length < 6) {
+    return false;
+  }
+
+  return true;
+}
+
+Future<Response> startSignUp(String email) async {
+  return await Dio().post(getUrl('/auth/signup'), data: {"email": email});
+}
+
+Future<Response> completeSignUp(Map data) async {
+  return await Dio().post(getUrl('/auth/signup/f'), data: data);
 }

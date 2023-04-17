@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:taskify/calendar/calendar_page.dart';
 import 'package:taskify/components/bottom_navigation_bar.dart';
 import 'package:taskify/settings/settings_page.dart';
@@ -17,9 +18,15 @@ class _HomeState extends State<Home> {
   int _selectedIndex = 0;
   late List<Widget> pages;
 
+  bool loading = true;
+
   @override
   void initState() {
-    name = 'هادی';
+    name = '';
+    SharedPreferences.getInstance().then((value) {
+      loading = false;
+      name = value.getString('fname') ?? 'یه اسم';
+    });
     pages = [MainPage(name: name), const Calendar(), const Settings()];
     super.initState();
   }
@@ -28,7 +35,7 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       bottomNavigationBar: MyBottomNavigationBar(
-        white: _selectedIndex == 0? false: true,
+          white: _selectedIndex == 0 ? false : true,
           changeSelection: (index) => setState(() {
                 _selectedIndex = index;
               })),
@@ -52,6 +59,7 @@ class MainPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Size size = MediaQuery.of(context).size;
     return Column(
       children: [
         Padding(
@@ -183,8 +191,36 @@ class MainPage extends StatelessWidget {
                       )),
                 ),
                 const Spacer(),
-                Image.asset(
-                  'assets/home-ill.png',
+                Container(
+                  width: size.width * .8,
+                  decoration: BoxDecoration(
+                      color: darkNord3,
+                      borderRadius: BorderRadius.circular(20)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      children: [
+                        const Text(
+                          'نکته امروز',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 25),
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        const Text(
+                          'لاب لاب دیس ایز ایلان ماسک درس هاتون رو اینجوری بخونین ها ها ها ها خوب',
+                          style: TextStyle(
+                              color: lightNord1,
+                              fontWeight: FontWeight.w100,
+                              fontSize: 17),
+                        ),
+                        Image.asset('assets/home-ill.png')
+                      ],
+                    ),
+                  ),
                 ),
                 const Spacer()
               ],

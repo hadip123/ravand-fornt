@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:taskify/components/login_input.dart';
 import 'package:taskify/home/home_page.dart';
+import 'package:taskify/login/login_model.dart';
 import 'package:taskify/signup/signup_page.dart';
 import 'package:taskify/theme.dart';
 
@@ -83,9 +84,19 @@ class _LoginState extends State<Login> {
 
   ElevatedButton buildContinueButton(Size size) {
     return ElevatedButton(
-      onPressed: () {
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (_) => const Home()));
+      onPressed: () async {
+        final res = await login(_email.text, _password.text);
+
+        if (res.statusCode == 404) {
+          // User doesn't exist
+        }
+        if (res.statusCode == 403) {
+          // Password doesn't match
+        }
+        if (res.statusCode == 200) {
+          Navigator.pushReplacement(
+              context, MaterialPageRoute(builder: (_) => const Home()));
+        }
       },
       style: ElevatedButton.styleFrom(
           fixedSize: Size(size.width - 100, 45),

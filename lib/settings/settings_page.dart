@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:percent_indicator/percent_indicator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:skeleton_loader/skeleton_loader.dart';
+import 'package:taskify/components/profile.dart';
+import 'package:taskify/components/setings_item.dart';
 
 class Settings extends StatefulWidget {
   const Settings({super.key});
@@ -14,11 +17,19 @@ class _SettingsState extends State<Settings> {
   late String name;
   late String lastName;
 
+  bool isLoading = true;
+
   @override
   void initState() {
     super.initState();
-    name = 'محمدهادی';
-    lastName = 'پهلوان';
+    SharedPreferences.getInstance().then((value) {
+      setState(() {
+        isLoading = false;
+      });
+      name = value.getString('fname') ?? 'یه اسم';
+    });
+    name = 'در حال بارگذاری';
+    lastName = 'درحال بارگذاری';
   }
 
   @override
@@ -30,15 +41,19 @@ class _SettingsState extends State<Settings> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            buildProfileBar(),
+            isLoading
+                ? SkeletonLoader(builder: buildProfileBar())
+                : buildProfileBar(),
             const SizedBox(
               height: 30,
             ),
-            buildName(),
+            isLoading ? SkeletonLoader(builder: buildName()) : buildName(),
             const SizedBox(
               height: 20,
             ),
-            buildSettingsList(),
+            isLoading
+                ? SkeletonLoader(builder: buildSettingsList())
+                : buildSettingsList(),
             const Spacer(),
             buildSignOutButton()
           ],
@@ -169,109 +184,9 @@ class _SettingsState extends State<Settings> {
         const Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'تاریخ عضویت',
-              style: TextStyle(fontWeight: FontWeight.w200),
-            ),
-            Text(
-              '۳ ماه پیش',
-              style: TextStyle(fontWeight: FontWeight.w700),
-            )
-          ],
+          children: [Text('کاربر عادی روند')],
         )
       ],
-    );
-  }
-}
-
-class SetttingsItem extends StatelessWidget {
-  SetttingsItem({
-    super.key,
-    required this.icon,
-    required this.color,
-    required this.onTap,
-    required this.title,
-  });
-
-  String title;
-  Widget icon;
-  MaterialColor color;
-  VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      title: Text(
-        title,
-        style: const TextStyle(fontWeight: FontWeight.bold),
-      ),
-      leading: Container(
-          width: 50,
-          decoration: BoxDecoration(color: color[50], shape: BoxShape.circle),
-          height: 50,
-          child: icon),
-      trailing: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          width: 50,
-          decoration: BoxDecoration(
-              color: Colors.blueGrey[50],
-              borderRadius: BorderRadius.circular(10)),
-          height: 50,
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Transform.rotate(
-              angle: 3.15,
-              child: SvgPicture.asset(
-                'assets/Chevron Right.svg',
-                color: Colors.blueGrey,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class Profile extends StatelessWidget {
-  const Profile({
-    super.key,
-    required double profileRadius,
-  }) : _profileRadius = profileRadius;
-
-  final double _profileRadius;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: _profileRadius * 2,
-      height: _profileRadius * 2,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          CircularPercentIndicator(
-            radius: _profileRadius,
-            lineWidth: 4,
-            percent: 0.67,
-            backgroundColor: Colors.transparent,
-            circularStrokeCap: CircularStrokeCap.round,
-          ),
-          Align(
-            alignment: Alignment.center,
-            child: ClipOval(
-              child: Image.network(
-                // 'https://picsum.photos/191/191?random=${Random().nextInt(1000)}',
-                'https://i.pravatar.cc/200?img=11',
-                width: _profileRadius + 110.0 - 68.0,
-                height: _profileRadius + 110.0 - 68.0,
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

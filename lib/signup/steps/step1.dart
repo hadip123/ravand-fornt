@@ -1,9 +1,10 @@
-import 'dart:convert';
-
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:otp_pin_field/otp_pin_field.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:taskify/components/login_input.dart';
 import 'package:taskify/components/stepper_bottom.dart';
+import 'package:taskify/home/home_page.dart';
 import 'package:taskify/signup/signup_model.dart';
 import 'package:taskify/theme.dart';
 
@@ -24,9 +25,8 @@ class _SignUpStep1State extends State<SignUpStep1> {
   void Function() pervStep;
   final _nameController = TextEditingController();
   final _lastNameController = TextEditingController();
-  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-
+  String verCode = '';
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
@@ -48,6 +48,22 @@ class _SignUpStep1State extends State<SignUpStep1> {
                     padding: const EdgeInsets.symmetric(horizontal: 30),
                     child: ListView(
                       children: [
+                        const Text(
+                          'کد تایید',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        OtpPinField(
+                            maxLength: 6,
+                            fieldWidth: size.width / 6 - 30,
+                            fieldHeight: 50,
+                            onSubmit: (submit) {
+                              setState(() {
+                                verCode = submit;
+                              });
+                            },
+                            otpPinFieldDecoration:
+                                OtpPinFieldDecoration.defaultPinBoxDecoration,
+                            onChange: (value) {}),
                         LoginInput(
                             size: size,
                             type: TextInputType.name,
@@ -72,16 +88,6 @@ class _SignUpStep1State extends State<SignUpStep1> {
                         ),
                         LoginInput(
                             size: size,
-                            type: TextInputType.emailAddress,
-                            hint: 'example@gmail.com',
-                            controller: _emailController,
-                            label: 'ایمیل',
-                            isHidden: false),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        LoginInput(
-                            size: size,
                             type: TextInputType.visiblePassword,
                             hint: '',
                             controller: _passwordController,
@@ -96,33 +102,52 @@ class _SignUpStep1State extends State<SignUpStep1> {
                 ),
                 StepperBottom(
                     nextStep: () async {
-                      final res = await signUp({
-                        "email": _emailController.text,
-                        "password": _passwordController.text,
-                        "fn": _nameController.text,
-                        "ln": _lastNameController.text,
-                      });
-                      if (res.statusCode == 404) {
+                      Map data = {
+                        'fn': _nameController.text,
+                        'ln': _lastNameController.text,
+                        'password': _passwordController.text,
+                        'ipass': verCode,
+                        'token': (await SharedPreferences.getInstance())
+                            .getString('mob_token'),
+                      };
+                      print(data);
+                      if (!validatePassword(_passwordController.text)) {
                         SnackBar snackBar = const SnackBar(
-                          content: Directionality(
-                              textDirection: TextDirection.rtl,
-                              child: Text('کاربر وجود دارد')),
-                          behavior: SnackBarBehavior.floating,
-                        );
-
+                            content: Text(
+                                'رمز عبور باشد شامل شرایط زیر باشد:\nحداقل شامل ۶ کاراکتر'));
                         ScaffoldMessenger.of(context).showSnackBar(snackBar);
                         return;
                       }
-                      if (res.statusCode == 201) {
-                        final data = jsonDecode(res.body);
-                        await (await SharedPreferences.getInstance())
-                            .setString('verToken', data['uuid']);
-                        print('NEXT_STEP');
-                        nextStep();
+                      if (_nameController.text.isEmpty ||
+                          _lastNameController.text.isEmpty) {
+                        SnackBar snackBar = const SnackBar(
+                            content: Text('نام و نام خانوادگی اجباری است'));
+                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                        return;
                       }
-                      print(res.statusCode);
-                      print(res.body);
-                      return;
+
+                      try {
+                        final result = await completeSignUp(data);
+
+                        await (await SharedPreferences.getInstance())
+                            .setString('token', result.data['jwt']);
+
+                        Navigator.pushReplacement(context,
+                            MaterialPageRoute(builder: (_) => const Home()));
+                      } on DioError catch (e) {
+                        if (e.response!.statusCode == 404) {
+                          SnackBar snackBar = const SnackBar(
+                              content: Text('دوباره امتحان کنید'));
+                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                          return;
+                        }
+                        if (e.response!.statusCode == 403) {
+                          SnackBar snackBar = const SnackBar(
+                              content: Text('کد تایید اشتباه است'));
+                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                        }
+                        return;
+                      }
                     },
                     pervStep: pervStep),
                 const SizedBox(

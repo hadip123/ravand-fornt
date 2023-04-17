@@ -46,6 +46,8 @@ dependencies:
   shamsi_date: ^1.0.1
   timelines: ^0.1.0
   time_range: ^1.1.0
+  otp_pin_field: ^1.1.2+2
+  skeleton_loader: ^2.0.0+4
 
 dev_dependencies:
   flutter_test:

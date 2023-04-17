@@ -1,10 +1,5 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:taskify/components/stepper_bottom.dart';
-import 'package:taskify/home/home_page.dart';
-import 'package:taskify/signup/signup_model.dart';
 
 class SignUpStep2 extends StatefulWidget {
   SignUpStep2({required this.nextStep, required this.pervStep, super.key});
@@ -47,47 +42,7 @@ class _SignUpStep2State extends State<SignUpStep2> {
                   ),
                 ),
                 ElevatedButton(
-                    onPressed: () async {
-                      final uuid = (await SharedPreferences.getInstance())
-                              .getString('uuid') ??
-                          '';
-                      final verificationCode = _verificationController.text;
-
-                      final res = await verifyEmail({
-                        "token": uuid,
-                        "ipass": verificationCode,
-                      });
-
-                      print(res.statusCode);
-                      print(res.body);
-
-                      if (res.statusCode == 201) {
-                        final data = jsonDecode(res.body);
-                        if (data['stat'] == 1) {
-                          SnackBar snackBar = const SnackBar(
-                              content: Text('دوباره امتحان کنید'));
-
-                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                          pervStep();
-                          return;
-                        }
-                        if (data['stat'] == 3) {
-                          SnackBar snackBar = const SnackBar(
-                              content: Text(
-                                  'مهلت کد تایید تمام شد. دوباره امتحان کنید'));
-
-                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                          pervStep();
-                          return;
-                        }
-
-                        await (await SharedPreferences.getInstance())
-                            .setString('token', data['jwt']);
-                        Navigator.pushReplacement(context,
-                            MaterialPageRoute(builder: (_) => const Home()));
-                      }
-                    },
-                    child: const Text('تایید'))
+                    onPressed: () async {}, child: const Text('تایید'))
               ],
             ),
           )),

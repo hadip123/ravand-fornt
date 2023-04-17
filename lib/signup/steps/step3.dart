@@ -1,5 +1,9 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:taskify/components/login_input.dart';
 import 'package:taskify/components/stepper_bottom.dart';
+import 'package:taskify/signup/signup_model.dart';
 
 class SignUpStep3 extends StatefulWidget {
   SignUpStep3({required this.nextStep, required this.pervStep, super.key});
@@ -16,15 +20,60 @@ class _SignUpStep3State extends State<SignUpStep3> {
   _SignUpStep3State({required this.nextStep, required this.pervStep});
   void Function() nextStep;
   void Function() pervStep;
-
+  final _emailController = TextEditingController();
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Column(
-        children: [
-          const Text('Step 3'),
-          StepperBottom(nextStep: nextStep, pervStep: pervStep),
-        ],
+    final Size size = MediaQuery.of(context).size;
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Container(
+        child: Column(
+          children: [
+            Expanded(
+                child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  LoginInput(
+                      size: size,
+                      type: TextInputType.emailAddress,
+                      hint: 'example@example.com',
+                      controller: _emailController,
+                      label: 'ایمیل',
+                      isHidden: false),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                ],
+              ),
+            )),
+            StepperBottom(
+                nextStep: () async {
+                  if (!validateEmail(_emailController.text)) {
+                    return;
+                  }
+                  try {
+                    final result = await startSignUp(_emailController.text);
+                    if (result.statusCode == 200) {
+                      await (await SharedPreferences.getInstance()).setString(
+                        'mob_token',
+                        result.data['token'] ?? '',
+                      );
+                      nextStep();
+                      return;
+                    }
+                  } on DioError catch (e) {
+                    if (e.response!.statusCode == 409) {
+                      SnackBar snackBar =
+                          const SnackBar(content: Text('کاربر وجود دارد'));
+                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                      return;
+                    }
+                  }
+                },
+                pervStep: pervStep),
+          ],
+        ),
       ),
     );
   }

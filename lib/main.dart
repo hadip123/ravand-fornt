@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:taskify/firstStart/firstStart_page.dart';
+import 'package:taskify/start/start_page.dart';
 import 'package:taskify/theme.dart';
 
 void main() async {
@@ -21,6 +22,6 @@ void main() async {
         androidOverscrollIndicator: androidOverscrollIndicator,
         fontFamily: FontSettings.family,
         colorScheme: const ColorScheme.light(primary: darkNord3)),
-    home: const FirstStart(),
+    home: const Start(),
   ));
 }
