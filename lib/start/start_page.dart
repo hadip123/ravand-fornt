@@ -17,14 +17,16 @@ class Start extends StatefulWidget {
 
 class _StartState extends State<Start> {
   bool hasError = false;
+  String errorText = 'Couldn\'t connect, Try again.';
   @override
   void initState() {
     getProfile().then((value) async {
       final instance = await SharedPreferences.getInstance();
-
-      await instance.setString('fname', value.data['fname']);
-      await instance.setString('lname', value.data['lname']);
+      print(value.data);
+      await instance.setString('fname', value.data['fName']);
+      await instance.setString('lname', value.data['lName']);
       await instance.setString('email', value.data['email']);
+      // await instance.setString('plans', '[]');
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -33,12 +35,16 @@ class _StartState extends State<Start> {
       );
     }).onError((error, stackTrace) {
       if (error.runtimeType == DioError) {
+        if ((error as DioError).error.runtimeType == SocketException) {
+          hasError = true;
+          errorText = 'Check your internet';
+          setState(() {});
+          return;
+        }
+
         Navigator.push(
             context, MaterialPageRoute(builder: (_) => const FirstStart()));
         return;
-      }
-      if (error.runtimeType == SocketException) {
-        hasError = true;
       }
     });
     super.initState();

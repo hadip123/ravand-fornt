@@ -1,9 +1,13 @@
+import 'dart:io';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:taskify/components/login_input.dart';
-import 'package:taskify/home/home_page.dart';
 import 'package:taskify/login/login_model.dart';
 import 'package:taskify/signup/signup_page.dart';
+import 'package:taskify/start/start_page.dart';
 import 'package:taskify/theme.dart';
 
 class Login extends StatefulWidget {
@@ -54,7 +58,7 @@ class _LoginState extends State<Login> {
                     hint: 'example@gmail.com',
                     controller: _email,
                     label: 'ایمیل شما',
-                    isHidden: true),
+                    isHidden: false),
                 const SizedBox(
                   height: 16,
                 ),
@@ -85,17 +89,38 @@ class _LoginState extends State<Login> {
   ElevatedButton buildContinueButton(Size size) {
     return ElevatedButton(
       onPressed: () async {
-        final res = await login(_email.text, _password.text);
-
-        if (res.statusCode == 404) {
-          // User doesn't exist
-        }
-        if (res.statusCode == 403) {
-          // Password doesn't match
-        }
-        if (res.statusCode == 200) {
-          Navigator.pushReplacement(
-              context, MaterialPageRoute(builder: (_) => const Home()));
+        try {
+          final res = await login(_email.text, _password.text);
+          await (await SharedPreferences.getInstance())
+              .setString('token', res.data['jwt']);
+          if (res.statusCode == 200) {
+            Navigator.pushReplacement(
+                context, MaterialPageRoute(builder: (_) => const Start()));
+          }
+        } on DioError catch (e) {
+          print(e);
+          if (e.error.runtimeType == SocketException) {
+            return;
+          }
+          final res = e.response!;
+          if (res.statusCode == 404) {
+            SnackBar snackBar =
+                const SnackBar(content: Text('کاربر وجود ندارد'));
+            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+            return;
+          }
+          if (res.statusCode == 403) {
+            SnackBar snackBar =
+                const SnackBar(content: Text('رمز عبور اشتباه است'));
+            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+            return;
+          }
+          if (res.statusCode == 400) {
+            SnackBar snackBar =
+                const SnackBar(content: Text('اطلاعات را دوباره بررسی کنید'));
+            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+            return;
+          }
         }
       },
       style: ElevatedButton.styleFrom(

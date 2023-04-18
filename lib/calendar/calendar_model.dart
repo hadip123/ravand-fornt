@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:shared_preferences/shared_preferences.dart';
+
 class Plan {
   String id;
   String name;
@@ -37,25 +41,6 @@ class PlanItem {
 }
 
 Future<List> getPlans() async {
-  return await Future.delayed(const Duration(milliseconds: 300), () {
-    return [
-      {
-        "name": "روز قشنگ ۱",
-        "items": [
-          {"start": "10:00", "end": "12:00", "name": "خوندن درس عربی"},
-          {"start": "12:00", "end": "13:25", "name": "خوندن درس ریاضی"},
-          {"start": "13:25", "end": "14:00", "name": "ناهار خوردن"}
-        ],
-        "createdDate": DateTime.now().toIso8601String()
-      },
-      {
-        "name": "روز قشنگ ۱",
-        "items": [],
-        "createdDate":
-            DateTime.now().subtract(const Duration(days: 10)).toIso8601String()
-      },
-    ];
-  });
+  final shared = await SharedPreferences.getInstance();
+  return jsonDecode(shared.getString('plans') ?? '[]');
 }
-
-Future generatePlan(Plan plan) async {}

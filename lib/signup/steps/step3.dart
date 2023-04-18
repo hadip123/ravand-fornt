@@ -34,6 +34,12 @@ class _SignUpStep3State extends State<SignUpStep3> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  ClipOval(
+                    child: Image.asset(
+                      'assets/login.jpeg',
+                      width: 200,
+                    ),
+                  ),
                   LoginInput(
                       size: size,
                       type: TextInputType.emailAddress,
@@ -54,6 +60,7 @@ class _SignUpStep3State extends State<SignUpStep3> {
                   }
                   try {
                     final result = await startSignUp(_emailController.text);
+                    print(result);
                     if (result.statusCode == 200) {
                       await (await SharedPreferences.getInstance()).setString(
                         'mob_token',
@@ -72,6 +79,9 @@ class _SignUpStep3State extends State<SignUpStep3> {
                   }
                 },
                 pervStep: pervStep),
+            const SizedBox(
+              height: 10,
+            ),
           ],
         ),
       ),

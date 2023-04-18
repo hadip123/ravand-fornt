@@ -1,5 +1,10 @@
+import 'dart:convert';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:taskify/calendar/calendar_page.dart';
+import 'package:taskify/generatePlan/generatePlan_model.dart';
 import 'package:taskify/theme.dart';
 import 'package:time_range/time_range.dart';
 import 'package:wheel_chooser/wheel_chooser.dart';
@@ -28,6 +33,25 @@ class _GeneratePlanState extends State<GeneratePlan> {
   TimeRangeResult? timeSettingsResult;
 
   TextEditingController nameController = TextEditingController();
+
+  createTime(TimeOfDay time) {
+    String hour = '00';
+    String minute = '00';
+    String givenHour = time.hour.toString();
+    String givenMinute = time.minute.toString();
+    if (givenHour.length == 1) {
+      hour = '0$givenHour';
+    } else {
+      hour = givenHour;
+    }
+    if (givenMinute.length == 1) {
+      minute = '0$givenMinute';
+    } else {
+      minute = givenMinute;
+    }
+    return '$hour:$minute';
+  }
+
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
@@ -37,10 +61,58 @@ class _GeneratePlanState extends State<GeneratePlan> {
           floatingActionButton: FloatingActionButton(
             backgroundColor: darkNord2,
             foregroundColor: Colors.white,
-            onPressed: () {
-              Map data = {};
-              print(blockedTimes);
-              print(tasks);
+            onPressed: () async {
+              for (final task in tasks) {
+                print(task);
+                task['imp'] = task['importance'];
+                task['min'] = task['minLen'];
+                task['score'] = null;
+              }
+              for (final bt in blockedTimes) {
+                bt['start'] = createTime(TimeOfDay(
+                    hour: int.parse(bt['start'].split(':')[0]),
+                    minute: int.parse(bt['start'].split(':')[1])));
+                bt['end'] = createTime(TimeOfDay(
+                    hour: int.parse(bt['end'].split(':')[0]),
+                    minute: int.parse(bt['end'].split(':')[1])));
+              }
+              try {
+                print(jsonEncode({
+                  'blocked': blockedTimes,
+                  'tasks': tasks,
+                  'start': createTime(timeSettingsResult!.start),
+                  'end': createTime(timeSettingsResult!.end),
+                }));
+                final res = await generatePlan({
+                  'blocked': blockedTimes,
+                  'tasks': tasks,
+                  'start': createTime(timeSettingsResult!.start),
+                  'end': createTime(timeSettingsResult!.end),
+                });
+                final instance = await SharedPreferences.getInstance();
+                await instance.setString(
+                    'plans',
+                    jsonEncode([
+                      {
+                        'createdAt': DateTime.now().toIso8601String(),
+                        "items": res.data
+                      },
+                      ...jsonDecode(instance.getString('plans') ?? '[]')
+                    ]));
+
+                Navigator.pop(context, true);
+              } on DioError catch (e) {
+                print(e);
+                if (e.response!.statusCode == 400) {}
+                if (e.response!.statusCode == 500) {
+                  SnackBar snackBar = const SnackBar(
+                      content: Text(
+                          'خطای سرور، شاید بلاک تایم را باید از ۱ دونه بیشتر کنید'));
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                  setState(() {});
+                  return;
+                }
+              }
             },
             child: const Icon(Icons.create),
           ),
@@ -155,13 +227,91 @@ class _GeneratePlanState extends State<GeneratePlan> {
                                                   hour: 23, minute: 59),
                                               timeStep: 10,
                                               timeBlock: 15,
-                                              onRangeCompleted: (range) =>
-                                                  setState(() => setState(() {
-                                                        if (range != null) {
-                                                          timeRangeResult =
-                                                              range;
-                                                        }
-                                                      })),
+                                              onFirstTimeSelected: (time) {
+                                                final thisTimeDate = DateTime(
+                                                    2000,
+                                                    10,
+                                                    2,
+                                                    time.hour,
+                                                    time.minute);
+                                                for (final a in blockedTimes) {
+                                                  final timeA = TimeOfDay(
+                                                      hour: int.parse(a['start']
+                                                          .split(':')[0]),
+                                                      minute: int.parse(
+                                                          a['start']
+                                                              .split(':')[1]));
+                                                  final timeB = TimeOfDay(
+                                                      hour: int.parse(a['end']
+                                                          .split(':')[0]),
+                                                      minute: int.parse(a['end']
+                                                          .split(':')[1]));
+                                                  if (time.hour >= timeA.hour &&
+                                                      time.hour <= timeB.hour &&
+                                                      time.minute >=
+                                                          timeA.minute &&
+                                                      time.minute <=
+                                                          timeB.minute) {
+                                                    SnackBar snackBar =
+                                                        const SnackBar(
+                                                            duration: Duration(
+                                                                milliseconds:
+                                                                    500),
+                                                            content: Text(
+                                                                'شما قبلا این تایم را بلاک کرده اید'));
+                                                    ScaffoldMessenger.of(
+                                                            context)
+                                                        .showSnackBar(snackBar);
+                                                    setState(() {});
+                                                    return;
+                                                  }
+                                                }
+                                              },
+                                              onRangeCompleted: (range) {
+                                                final thisTimeDate = DateTime(
+                                                    2000,
+                                                    10,
+                                                    2,
+                                                    range!.start.hour,
+                                                    range.start.minute);
+                                                for (final a in blockedTimes) {
+                                                  final timeA = TimeOfDay(
+                                                      hour: int.parse(a['start']
+                                                          .split(':')[0]),
+                                                      minute: int.parse(
+                                                          a['start']
+                                                              .split(':')[1]));
+                                                  final timeB = TimeOfDay(
+                                                      hour: int.parse(a['end']
+                                                          .split(':')[0]),
+                                                      minute: int.parse(a['end']
+                                                          .split(':')[1]));
+                                                  if (range.start.hour >=
+                                                          timeA.hour &&
+                                                      range.start.hour <=
+                                                          timeB.hour &&
+                                                      range.start.minute >=
+                                                          timeA.minute &&
+                                                      range.start.minute <=
+                                                          timeB.minute) {
+                                                    SnackBar snackBar =
+                                                        const SnackBar(
+                                                            duration: Duration(
+                                                                milliseconds:
+                                                                    500),
+                                                            content: Text(
+                                                                'شما قبلا این تایم را بلاک کرده اید'));
+                                                    ScaffoldMessenger.of(
+                                                            context)
+                                                        .showSnackBar(snackBar);
+                                                    setState(() {});
+                                                    return;
+                                                  }
+                                                }
+                                                setState(() => setState(() {
+                                                      timeRangeResult = range;
+                                                    }));
+                                              },
                                             ),
                                           ),
                                           const Text('نام زمان بلاک شده'),
@@ -184,6 +334,52 @@ class _GeneratePlanState extends State<GeneratePlan> {
                                                   fixedSize:
                                                       const Size(400, 40)),
                                               onPressed: () {
+                                                final thisTimeDate = DateTime(
+                                                    2000,
+                                                    10,
+                                                    2,
+                                                    timeRangeResult!.start.hour,
+                                                    timeRangeResult!
+                                                        .start.minute);
+                                                for (final a in blockedTimes) {
+                                                  final timeA = TimeOfDay(
+                                                      hour: int.parse(a['start']
+                                                          .split(':')[0]),
+                                                      minute: int.parse(
+                                                          a['start']
+                                                              .split(':')[1]));
+                                                  final timeB = TimeOfDay(
+                                                      hour: int.parse(a['end']
+                                                          .split(':')[0]),
+                                                      minute: int.parse(a['end']
+                                                          .split(':')[1]));
+                                                  if (timeRangeResult!
+                                                              .start.hour >=
+                                                          timeA.hour &&
+                                                      timeRangeResult!
+                                                              .start.hour <=
+                                                          timeB.hour) {
+                                                    if (timeRangeResult!
+                                                                .start.minute >
+                                                            timeA.minute &&
+                                                        timeRangeResult!
+                                                                .start.minute <
+                                                            timeB.minute) {
+                                                      SnackBar snackBar =
+                                                          const SnackBar(
+                                                              duration: Duration(
+                                                                  milliseconds:
+                                                                      500),
+                                                              content: Text(
+                                                                  'شما قبلا این تایم را بلاک کرده اید'));
+                                                      ScaffoldMessenger.of(
+                                                              context)
+                                                          .showSnackBar(
+                                                              snackBar);
+                                                      return;
+                                                    }
+                                                  }
+                                                }
                                                 setState(() {
                                                   if (timeRangeResult == null ||
                                                       nameController.text ==
@@ -265,6 +461,19 @@ class _GeneratePlanState extends State<GeneratePlan> {
                                                 foregroundColor: darkNord1,
                                                 child: Icon(Icons.timelapse)),
                                             iconColor: darkNord3,
+                                            trailing: IconButton(
+                                              icon: const Icon(
+                                                Icons.delete,
+                                                color: Colors.red,
+                                              ),
+                                              onPressed: () {
+                                                final int index =
+                                                    tasks.indexOf(e);
+                                                setState(() {
+                                                  tasks.removeAt(index);
+                                                });
+                                              },
+                                            ),
                                             subtitle: Text(numberToPersian(
                                                 'حداقل زمان مورد نیاز: ${e['minLen']}\nمیزان اهمیت از ۲۰: ${e['importance']}')),
                                           ))

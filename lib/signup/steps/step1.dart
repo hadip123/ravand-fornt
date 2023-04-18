@@ -4,8 +4,8 @@ import 'package:otp_pin_field/otp_pin_field.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:taskify/components/login_input.dart';
 import 'package:taskify/components/stepper_bottom.dart';
-import 'package:taskify/home/home_page.dart';
 import 'package:taskify/signup/signup_model.dart';
+import 'package:taskify/start/start_page.dart';
 import 'package:taskify/theme.dart';
 
 class SignUpStep1 extends StatefulWidget {
@@ -52,18 +52,21 @@ class _SignUpStep1State extends State<SignUpStep1> {
                           'کد تایید',
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        OtpPinField(
-                            maxLength: 6,
-                            fieldWidth: size.width / 6 - 30,
-                            fieldHeight: 50,
-                            onSubmit: (submit) {
-                              setState(() {
-                                verCode = submit;
-                              });
-                            },
-                            otpPinFieldDecoration:
-                                OtpPinFieldDecoration.defaultPinBoxDecoration,
-                            onChange: (value) {}),
+                        Directionality(
+                          textDirection: TextDirection.ltr,
+                          child: OtpPinField(
+                              maxLength: 6,
+                              fieldWidth: size.width / 6 - 30,
+                              fieldHeight: 50,
+                              onSubmit: (submit) {
+                                setState(() {
+                                  verCode = submit;
+                                });
+                              },
+                              otpPinFieldDecoration:
+                                  OtpPinFieldDecoration.defaultPinBoxDecoration,
+                              onChange: (value) {}),
+                        ),
                         LoginInput(
                             size: size,
                             type: TextInputType.name,
@@ -133,7 +136,7 @@ class _SignUpStep1State extends State<SignUpStep1> {
                             .setString('token', result.data['jwt']);
 
                         Navigator.pushReplacement(context,
-                            MaterialPageRoute(builder: (_) => const Home()));
+                            MaterialPageRoute(builder: (_) => const Start()));
                       } on DioError catch (e) {
                         if (e.response!.statusCode == 404) {
                           SnackBar snackBar = const SnackBar(

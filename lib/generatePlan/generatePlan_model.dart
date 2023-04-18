@@ -1,5 +1,12 @@
 import 'package:dio/dio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:taskify/universal/universal.dart';
 
-// Future<Response> generatePlan(List tasks, List blockedTimes) async {
-  
-// }
+Future<Response> generatePlan(Map data) async {
+  return Dio().post(getUrl('/plan/create'),
+      data: data,
+      options: Options(headers: {
+        'Authorization':
+            'Bearer ${(await SharedPreferences.getInstance()).getString('token')}'
+      }));
+}

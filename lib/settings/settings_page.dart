@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skeleton_loader/skeleton_loader.dart';
 import 'package:taskify/components/profile.dart';
 import 'package:taskify/components/setings_item.dart';
+import 'package:taskify/start/start_page.dart';
 
 class Settings extends StatefulWidget {
   const Settings({super.key});
@@ -22,14 +23,15 @@ class _SettingsState extends State<Settings> {
   @override
   void initState() {
     super.initState();
+    name = 'در حال بارگذاری';
+    lastName = 'درحال بارگذاری';
     SharedPreferences.getInstance().then((value) {
       setState(() {
         isLoading = false;
       });
       name = value.getString('fname') ?? 'یه اسم';
+      lastName = value.getString('lname') ?? 'یه اسم';
     });
-    name = 'در حال بارگذاری';
-    lastName = 'درحال بارگذاری';
   }
 
   @override
@@ -68,7 +70,14 @@ class _SettingsState extends State<Settings> {
             backgroundColor: Colors.blueGrey[50],
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10))),
-        onPressed: () {},
+        onPressed: () async {
+          final instance = await SharedPreferences.getInstance();
+          await instance.setString('token', 'value');
+          await instance.setString('plans', '[]');
+
+          Navigator.pushReplacement(
+              context, MaterialPageRoute(builder: (_) => const Start()));
+        },
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -130,8 +139,9 @@ class _SettingsState extends State<Settings> {
                     style: TextStyle(fontSize: 30),
                   ),
                   Text('Developers:\nM.Hadi Pahlevand, Mohammad Langari'),
-                  Text('Website: hipoo.ir'),
-                  Text('School: Shahid-Beheshti HighSchool')
+                  Text('Website: ravand.hipoo.ir'),
+                  Text('School: Shahid-Beheshti HighSchool'),
+                  Text('Copyright © 2023 Hipoo! All right Reserved')
                 ],
               );
 

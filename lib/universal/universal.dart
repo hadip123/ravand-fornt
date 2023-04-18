@@ -6,7 +6,7 @@ String getUrl(String route) {
 }
 
 Future<Response> getProfile() async {
-  return await Dio().post(getUrl('/users/me'),
+  return await Dio().get(getUrl('/users/me'),
       options: Options(headers: {
         'Authorization':
             'Bearer ${(await SharedPreferences.getInstance()).getString('token')}'

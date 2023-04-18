@@ -1,8 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:taskify/calendar/calendar_page.dart';
+import 'package:taskify/components/alert_message.dart';
 import 'package:taskify/components/bottom_navigation_bar.dart';
+import 'package:taskify/home/home_model.dart';
 import 'package:taskify/settings/settings_page.dart';
 import 'package:taskify/theme.dart';
 
@@ -14,20 +18,13 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  late String name;
   int _selectedIndex = 0;
   late List<Widget> pages;
-
   bool loading = true;
 
   @override
   void initState() {
-    name = '';
-    SharedPreferences.getInstance().then((value) {
-      loading = false;
-      name = value.getString('fname') ?? 'یه اسم';
-    });
-    pages = [MainPage(name: name), const Calendar(), const Settings()];
+    pages = [const MainPage(), const Calendar(), const Settings()];
     super.initState();
   }
 
@@ -49,13 +46,35 @@ class _HomeState extends State<Home> {
   }
 }
 
-class MainPage extends StatelessWidget {
+class MainPage extends StatefulWidget {
   const MainPage({
     super.key,
-    required this.name,
   });
 
-  final String name;
+  @override
+  State<MainPage> createState() => _MainPageState();
+}
+
+class _MainPageState extends State<MainPage> {
+  late String name;
+  bool loading = true;
+  List plan = [];
+  String note = '';
+  @override
+  void initState() {
+    super.initState();
+    name = '';
+    SharedPreferences.getInstance().then((value) async {
+      name = value.getString('fname') ?? 'یه اسم';
+      plan = jsonDecode(value.getString('plans') ?? '[]');
+      print(plan);
+
+      final res = await getTodayNote();
+      note = res.data;
+      loading = false;
+      setState(() {});
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -123,102 +142,90 @@ class MainPage extends StatelessWidget {
                 const SizedBox(
                   height: 40,
                 ),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: 67,
-                      height: 67,
-                      decoration: BoxDecoration(
-                          color: darkNord4,
-                          borderRadius: BorderRadius.circular(20)),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: SvgPicture.asset('assets/Calender.svg'),
-                      ),
+                if (plan.isEmpty)
+                  const Align(
+                    alignment: Alignment.center,
+                    child: Text(
+                      'برنامه ای نساختی...',
+                      style: TextStyle(color: Colors.white, fontSize: 20),
                     ),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'امروز',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleLarge!
-                              .copyWith(color: lightNord4),
-                        ),
-                        Text(
-                          '۱۰:۰۰ - ۱۰:۲۵ ق.ظ',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium!
-                              .copyWith(color: Colors.white),
-                        )
-                      ],
-                    ),
-                  ],
-                ),
+                  ),
+                if (!loading) buildToday(context),
                 const SizedBox(
                   height: 10,
                 ),
-                Text(
-                  'خوندن درس عربی',
-                  style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                      fontWeight: FontWeight.w900, color: Colors.white),
-                ),
+                if (!loading) buildTaskName(context),
                 const SizedBox(
                   height: 30,
                 ),
-                Align(
-                  alignment: Alignment.center,
-                  child: TextButton(
-                      style: TextButton.styleFrom(
-                          backgroundColor: darkNord4,
-                          foregroundColor: Colors.white,
-                          fixedSize: const Size(190, 50),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20))),
-                      onPressed: () {},
-                      child: const Text(
-                        'شروع کن!',
+                if (!loading) buildStartButton(),
+                if (loading)
+                  const Align(
+                      alignment: Alignment.center,
+                      child: Text(
+                        'در حال بارگذاری',
                         style: TextStyle(
-                          fontSize: 18,
-                        ),
+                            color: Colors.white,
+                            fontSize: 30,
+                            fontWeight: FontWeight.w100),
                       )),
-                ),
                 const Spacer(),
-                Container(
-                  width: size.width * .8,
-                  decoration: BoxDecoration(
-                      color: darkNord3,
-                      borderRadius: BorderRadius.circular(20)),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      children: [
-                        const Text(
-                          'نکته امروز',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 25),
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        const Text(
-                          'لاب لاب دیس ایز ایلان ماسک درس هاتون رو اینجوری بخونین ها ها ها ها خوب',
-                          style: TextStyle(
-                              color: lightNord1,
-                              fontWeight: FontWeight.w100,
-                              fontSize: 17),
-                        ),
-                        Image.asset('assets/home-ill.png')
-                      ],
+                GestureDetector(
+                  onTap: () {
+                    var message = AlertMessage(
+                        title: 'نکته روز',
+                        image: Image.asset('assets/home-ill.png'),
+                        caption: note,
+                        onOkPressed: () {
+                          Navigator.pop(context);
+                        });
+
+                    showDialog(context: context, builder: (_) => message);
+                  },
+                  child: Container(
+                    width: size.width * .8,
+                    height: 300,
+                    decoration: BoxDecoration(
+                        color: darkNord3,
+                        borderRadius: BorderRadius.circular(20)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: loading
+                          ? const Center(
+                              child: Text(
+                                'در حال بارگذاری...',
+                                style: TextStyle(
+                                    fontSize: 20, color: Colors.white),
+                              ),
+                            )
+                          : Column(
+                              children: [
+                                const Text(
+                                  'نکته امروز',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 25),
+                                ),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                Text(
+                                  note,
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 3,
+                                  style: const TextStyle(
+                                      color: lightNord1,
+                                      fontWeight: FontWeight.w100,
+                                      fontSize: 17),
+                                ),
+                                const Spacer(),
+                                Image.asset(
+                                  'assets/home-ill.png',
+                                  height: 150,
+                                )
+                              ],
+                            ),
                     ),
                   ),
                 ),
@@ -229,5 +236,100 @@ class MainPage extends StatelessWidget {
         ))
       ],
     );
+  }
+
+  createTime(TimeOfDay time) {
+    String hour = '00';
+    String minute = '00';
+    String givenHour = time.hour.toString();
+    String givenMinute = time.minute.toString();
+    if (givenHour.length == 1) {
+      hour = '0$givenHour';
+    } else {
+      hour = givenHour;
+    }
+    if (givenMinute.length == 1) {
+      minute = '0$givenMinute';
+    } else {
+      minute = givenMinute;
+    }
+    return '$hour:$minute';
+  }
+
+  Widget buildToday(BuildContext context) {
+    return plan.isNotEmpty
+        ? Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 67,
+                height: 67,
+                decoration: BoxDecoration(
+                    color: darkNord4, borderRadius: BorderRadius.circular(20)),
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: SvgPicture.asset('assets/Calender.svg'),
+                ),
+              ),
+              const SizedBox(
+                width: 10,
+              ),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'امروز',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleLarge!
+                        .copyWith(color: lightNord4),
+                  ),
+                  Text(
+                    '${numberToPersian(createTime(TimeOfDay(hour: int.parse(plan[0]['items'][0]['from'].split(':')[0]), minute: int.parse(plan[0]['items'][0]['from'].split(':')[1]))))} تا ${numberToPersian(createTime(TimeOfDay(hour: int.parse(plan[0]['items'][0]['to'].split(':')[0]), minute: int.parse(plan[0]['items'][0]['to'].split(':')[1]))))}',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium!
+                        .copyWith(color: Colors.white),
+                  )
+                ],
+              ),
+            ],
+          )
+        : Container();
+  }
+
+  Widget buildTaskName(BuildContext context) {
+    return plan.isNotEmpty
+        ? Text(
+            plan[0]['items'][0]['name'],
+            style: Theme.of(context)
+                .textTheme
+                .headlineSmall!
+                .copyWith(fontWeight: FontWeight.w900, color: Colors.white),
+          )
+        : Container();
+  }
+
+  Widget buildStartButton() {
+    return plan.isNotEmpty
+        ? Align(
+            alignment: Alignment.center,
+            child: TextButton(
+                style: TextButton.styleFrom(
+                    backgroundColor: darkNord4,
+                    foregroundColor: Colors.white,
+                    fixedSize: const Size(190, 50),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20))),
+                onPressed: () {},
+                child: const Text(
+                  'شروع کن! (به زودی...)',
+                  style: TextStyle(
+                    fontSize: 18,
+                  ),
+                )),
+          )
+        : Container();
   }
 }
