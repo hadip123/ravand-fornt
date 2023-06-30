@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:taskify/calendar/calendar_page.dart';
-import 'package:taskify/generatePlan/generatePlan_model.dart';
-import 'package:taskify/theme.dart';
+import 'package:ravand/calendar/calendar_page.dart';
+import 'package:ravand/generatePlan/generatePlan_model.dart';
+import 'package:ravand/theme.dart';
 import 'package:time_range/time_range.dart';
 import 'package:wheel_chooser/wheel_chooser.dart';
 
@@ -86,6 +86,7 @@ class _GeneratePlanState extends State<GeneratePlan> {
                 final res = await generatePlan({
                   'blocked': blockedTimes,
                   'tasks': tasks,
+                  'loop': false,
                   'start': createTime(timeSettingsResult!.start),
                   'end': createTime(timeSettingsResult!.end),
                 });
@@ -102,7 +103,7 @@ class _GeneratePlanState extends State<GeneratePlan> {
 
                 Navigator.pop(context, true);
               } on DioError catch (e) {
-                print(e);
+                print(e.response?.data);
                 if (e.response!.statusCode == 400) {}
                 if (e.response!.statusCode == 500) {
                   SnackBar snackBar = const SnackBar(

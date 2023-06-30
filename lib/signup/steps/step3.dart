@@ -1,9 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:taskify/components/login_input.dart';
-import 'package:taskify/components/stepper_bottom.dart';
-import 'package:taskify/signup/signup_model.dart';
+import 'package:ravand/components/login_input.dart';
+import 'package:ravand/components/stepper_bottom.dart';
+import 'package:ravand/signup/signup_model.dart';
 
 class SignUpStep3 extends StatefulWidget {
   SignUpStep3({required this.nextStep, required this.pervStep, super.key});

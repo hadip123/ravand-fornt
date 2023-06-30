@@ -2,13 +2,14 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:ravand/pomodro/pomodro.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:taskify/calendar/calendar_page.dart';
-import 'package:taskify/components/alert_message.dart';
-import 'package:taskify/components/bottom_navigation_bar.dart';
-import 'package:taskify/home/home_model.dart';
-import 'package:taskify/settings/settings_page.dart';
-import 'package:taskify/theme.dart';
+import 'package:ravand/calendar/calendar_page.dart';
+import 'package:ravand/components/alert_message.dart';
+import 'package:ravand/components/bottom_navigation_bar.dart';
+import 'package:ravand/home/home_model.dart';
+import 'package:ravand/settings/settings_page.dart';
+import 'package:ravand/theme.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -24,7 +25,7 @@ class _HomeState extends State<Home> {
 
   @override
   void initState() {
-    pages = [const MainPage(), const Calendar(), const Settings()];
+    pages = [const MainPage(), Calendar(), const Settings()];
     super.initState();
   }
 
@@ -58,16 +59,20 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   late String name;
   bool loading = true;
+  Map? nowWork;
   List plan = [];
   String note = '';
   @override
   void initState() {
     super.initState();
     name = '';
+    getNow().then((value) => setState(() {
+          nowWork = value;
+          print(nowWork == null);
+        }));
     SharedPreferences.getInstance().then((value) async {
       name = value.getString('fname') ?? 'یه اسم';
       plan = jsonDecode(value.getString('plans') ?? '[]');
-      print(plan);
 
       final res = await getTodayNote();
       note = res.data;
@@ -150,7 +155,7 @@ class _MainPageState extends State<MainPage> {
                       style: TextStyle(color: Colors.white, fontSize: 20),
                     ),
                   ),
-                if (!loading) buildToday(context),
+                if (!loading && nowWork != null) buildToday(context),
                 const SizedBox(
                   height: 10,
                 ),
@@ -285,13 +290,14 @@ class _MainPageState extends State<MainPage> {
                         .titleLarge!
                         .copyWith(color: lightNord4),
                   ),
-                  Text(
-                    '${numberToPersian(createTime(TimeOfDay(hour: int.parse(plan[0]['items'][0]['from'].split(':')[0]), minute: int.parse(plan[0]['items'][0]['from'].split(':')[1]))))} تا ${numberToPersian(createTime(TimeOfDay(hour: int.parse(plan[0]['items'][0]['to'].split(':')[0]), minute: int.parse(plan[0]['items'][0]['to'].split(':')[1]))))}',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium!
-                        .copyWith(color: Colors.white),
-                  )
+                  if (nowWork != null)
+                    Text(
+                      '${numberToPersian(createTime(TimeOfDay(hour: int.parse(nowWork?['from'].split(':')[0]), minute: int.parse(nowWork?['from'].split(':')[1]))) ?? '')} تا ${numberToPersian(createTime(TimeOfDay(hour: int.parse(nowWork?['to'].split(':')[0]), minute: int.parse(nowWork?['to'].split(':')[1]))) ?? '')}',
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium!
+                          .copyWith(color: Colors.white),
+                    ),
                 ],
               ),
             ],
@@ -302,7 +308,7 @@ class _MainPageState extends State<MainPage> {
   Widget buildTaskName(BuildContext context) {
     return plan.isNotEmpty
         ? Text(
-            plan[0]['items'][0]['name'],
+            nowWork != null ? '${nowWork?['name']}' : 'کاری برای انجام نیست...',
             style: Theme.of(context)
                 .textTheme
                 .headlineSmall!
@@ -322,9 +328,12 @@ class _MainPageState extends State<MainPage> {
                     fixedSize: const Size(190, 50),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20))),
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (_) => const PomodroPage()));
+                },
                 child: const Text(
-                  'شروع کن! (به زودی...)',
+                  'شروع کن!',
                   style: TextStyle(
                     fontSize: 18,
                   ),

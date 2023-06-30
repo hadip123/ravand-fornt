@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/percent_indicator.dart';
-import 'package:taskify/theme.dart';
+import 'package:ravand/theme.dart';
 
 class Profile extends StatelessWidget {
   const Profile({

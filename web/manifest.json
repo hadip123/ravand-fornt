@@ -1,6 +1,6 @@
 {
-    "name": "taskify",
-    "short_name": "taskify",
+    "name": "ravand",
+    "short_name": "ravand",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

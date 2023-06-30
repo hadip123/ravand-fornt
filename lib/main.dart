@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:taskify/firstStart/firstStart_page.dart';
-import 'package:taskify/start/start_page.dart';
-import 'package:taskify/theme.dart';
+import 'package:ravand/firstStart/firstStart_page.dart';
+import 'package:ravand/pomodro/pomodro.dart';
+import 'package:ravand/start/start_page.dart';
+import 'package:ravand/theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

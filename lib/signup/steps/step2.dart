@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:taskify/components/stepper_bottom.dart';
+import 'package:ravand/components/stepper_bottom.dart';
 
 class SignUpStep2 extends StatefulWidget {
   SignUpStep2({required this.nextStep, required this.pervStep, super.key});

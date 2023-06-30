@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:taskify/theme.dart';
+import 'package:ravand/theme.dart';
 
 class MyBottomNavigationBar extends StatefulWidget {
   void Function(int index) changeSelection;

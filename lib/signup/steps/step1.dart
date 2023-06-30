@@ -2,11 +2,11 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:otp_pin_field/otp_pin_field.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:taskify/components/login_input.dart';
-import 'package:taskify/components/stepper_bottom.dart';
-import 'package:taskify/signup/signup_model.dart';
-import 'package:taskify/start/start_page.dart';
-import 'package:taskify/theme.dart';
+import 'package:ravand/components/login_input.dart';
+import 'package:ravand/components/stepper_bottom.dart';
+import 'package:ravand/signup/signup_model.dart';
+import 'package:ravand/start/start_page.dart';
+import 'package:ravand/theme.dart';
 
 class SignUpStep1 extends StatefulWidget {
   SignUpStep1({required this.nextStep, required this.pervStep, super.key});
@@ -110,6 +110,7 @@ class _SignUpStep1State extends State<SignUpStep1> {
                         'ln': _lastNameController.text,
                         'password': _passwordController.text,
                         'ipass': verCode,
+                        'role': 'child',
                         'token': (await SharedPreferences.getInstance())
                             .getString('mob_token'),
                       };
@@ -138,6 +139,7 @@ class _SignUpStep1State extends State<SignUpStep1> {
                         Navigator.pushReplacement(context,
                             MaterialPageRoute(builder: (_) => const Start()));
                       } on DioError catch (e) {
+                        print(e.response?.data);
                         if (e.response!.statusCode == 404) {
                           SnackBar snackBar = const SnackBar(
                               content: Text('دوباره امتحان کنید'));

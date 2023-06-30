@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:shamsi_date/shamsi_date.dart';
-import 'package:taskify/calendar/calendar_model.dart';
-import 'package:taskify/generatePlan/generatePlan_page.dart';
-import 'package:taskify/theme.dart';
+import 'package:ravand/calendar/calendar_model.dart';
+import 'package:ravand/generatePlan/generatePlan_page.dart';
+import 'package:ravand/theme.dart';
 import 'package:timelines/timelines.dart';
 
 class Calendar extends StatefulWidget {
-  const Calendar({super.key});
+  Calendar({super.key, this.inSeePlan = false});
+  bool inSeePlan;
 
   @override
   State<Calendar> createState() => _CalendarState();
@@ -43,25 +44,27 @@ class _CalendarState extends State<Calendar> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          final result = await Navigator.push(
-              context, MaterialPageRoute(builder: (_) => const GeneratePlan()));
+      floatingActionButton: widget.inSeePlan
+          ? null
+          : FloatingActionButton.extended(
+              onPressed: () async {
+                final result = await Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => const GeneratePlan()));
 
-          print(result);
-        },
-        label: const Text('ساخت برنامه'),
-        icon: const Icon(Icons.create_sharp),
-        backgroundColor: darkNord2,
-        foregroundColor: Colors.white,
-      ),
+                print(result);
+              },
+              label: const Text('ساخت برنامه'),
+              icon: const Icon(Icons.create_sharp),
+              backgroundColor: darkNord2,
+              foregroundColor: Colors.white,
+            ),
       backgroundColor: Colors.white,
       body: FutureBuilder(
           future: getPlans(),
           builder: (_, snapshot) {
             if (snapshot.hasData) {
               final List data = snapshot.data!;
-              print(data);
+              print('PLAN$data');
               if (data.isEmpty) {
                 return const Center(
                   child: Column(
@@ -119,10 +122,10 @@ class _CalendarState extends State<Calendar> {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Text(
-                                        numberToPersian(d['items'][index]
-                                                ['from'] +
-                                            ' تا ' +
-                                            d['items'][index]['to']),
+                                        numberToPersian(
+                                            '${d['items'][index]['from']}'
+                                            ' تا '
+                                            '${d['items'][index]['to']}'),
                                         style: const TextStyle(
                                             fontSize: 20,
                                             fontWeight: FontWeight.bold),

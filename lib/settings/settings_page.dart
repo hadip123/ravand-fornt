@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:ravand/parents/parents.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skeleton_loader/skeleton_loader.dart';
-import 'package:taskify/components/profile.dart';
-import 'package:taskify/components/setings_item.dart';
-import 'package:taskify/start/start_page.dart';
+import 'package:ravand/components/profile.dart';
+import 'package:ravand/components/setings_item.dart';
+import 'package:ravand/start/start_page.dart';
 
 class Settings extends StatefulWidget {
   const Settings({super.key});
@@ -101,55 +102,67 @@ class _SettingsState extends State<Settings> {
 
   Widget buildSettingsList() {
     final Size size = MediaQuery.of(context).size;
-    return SizedBox(
-      height: 300,
-      child: ListView(
-        children: [
-          SetttingsItem(
-            title: "آرشیو برنامه های من",
-            icon: Icon(
-              Icons.archive,
-              color: Colors.red[900],
-            ),
-            color: Colors.red,
-            onTap: () {},
+    return ListView(
+      shrinkWrap: true,
+      children: [
+        SetttingsItem(
+          title: "آرشیو برنامه های من",
+          icon: Icon(
+            Icons.archive,
+            color: Colors.red[900],
           ),
-          const SizedBox(
-            height: 20,
-          ),
-          SetttingsItem(
-            title: "درباره ما",
+          color: Colors.red,
+          onTap: () {},
+        ),
+        const SizedBox(
+          height: 20,
+        ),
+        SetttingsItem(
             icon: Icon(
-              Icons.info,
-              color: Colors.blue[900],
+              Icons.child_care,
+              color: Colors.teal[900],
             ),
-            color: Colors.blue,
+            color: Colors.teal,
             onTap: () {
-              final dialog = AboutDialog(
-                applicationIcon: SvgPicture.asset(
-                  'assets/logo.svg',
-                  width: 70,
-                  height: 70,
-                ),
-                applicationName: 'Ravand',
-                applicationVersion: '0.1 beta',
-                children: const [
-                  Text(
-                    'Hipoo™',
-                    style: TextStyle(fontSize: 30),
-                  ),
-                  Text('Developers:\nM.Hadi Pahlevand, Mohammad Langari'),
-                  Text('Website: ravand.hipoo.ir'),
-                  Text('School: Shahid-Beheshti HighSchool'),
-                  Text('Copyright © 2023 Hipoo! All right Reserved')
-                ],
-              );
-
-              showDialog(context: context, builder: (_) => dialog);
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const ParentsPage()));
             },
+            title: 'افزودن فرزند'),
+        const SizedBox(
+          height: 20,
+        ),
+        SetttingsItem(
+          title: "درباره ما",
+          icon: Icon(
+            Icons.info,
+            color: Colors.blue[900],
           ),
-        ],
-      ),
+          color: Colors.blue,
+          onTap: () {
+            final dialog = AboutDialog(
+              applicationIcon: SvgPicture.asset(
+                'assets/logo.svg',
+                width: 70,
+                height: 70,
+              ),
+              applicationName: 'Ravand',
+              applicationVersion: '0.1 beta',
+              children: const [
+                Text(
+                  'Hipoo™',
+                  style: TextStyle(fontSize: 30),
+                ),
+                Text('Developers:\nM.Hadi Pahlevan, Mohammad Langari'),
+                Text('Website: ravand.hipoo.ir'),
+                Text('School: Shahid-Beheshti HighSchool'),
+                Text('Copyright © 2023 Hipoo! All right Reserved')
+              ],
+            );
+
+            showDialog(context: context, builder: (_) => dialog);
+          },
+        ),
+      ],
     );
   }
 

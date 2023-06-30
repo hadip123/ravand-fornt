@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:taskify/universal/universal.dart';
+import 'package:ravand/universal/universal.dart';
 
 bool validateEmail(String email) {
   final domain = RegExp('@(.+)').firstMatch(email)?.group(1);

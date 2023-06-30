@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:taskify/components/shake_widget.dart';
-import 'package:taskify/signup/steps/step1.dart';
-import 'package:taskify/signup/steps/step2.dart';
-import 'package:taskify/signup/steps/step3.dart';
+import 'package:ravand/components/shake_widget.dart';
+import 'package:ravand/signup/steps/step1.dart';
+import 'package:ravand/signup/steps/step2.dart';
+import 'package:ravand/signup/steps/step3.dart';
 
 class Signup extends StatefulWidget {
   const Signup({super.key});
