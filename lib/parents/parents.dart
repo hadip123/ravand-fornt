@@ -27,7 +27,11 @@ class _ParentsPageState extends State<ParentsPage> {
       print(value);
       setState(() {
         loading = false;
-        children = value.data;
+        if (value.data == null) {
+          children = [];
+        } else {
+          children = value.data;
+        }
       });
     }).onError((error, stackTrace) {
       print(error);
@@ -148,9 +152,12 @@ class _ParentsPageState extends State<ParentsPage> {
                                     builder: (_) =>
                                         ChildPlan(childEmail: child['email'])));
                           },
-                          leading: const Icon(
-                            Icons.face,
-                            color: Colors.teal,
+                          leading: const CircleAvatar(
+                            backgroundColor: darkNord1,
+                            child: Icon(
+                              Icons.face,
+                              color: Colors.white,
+                            ),
                           ),
                           title: Text(child['fName'] + ' ' + child['lName']),
                         )

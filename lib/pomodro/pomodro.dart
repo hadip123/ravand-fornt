@@ -6,6 +6,7 @@ import 'package:ravand/pomodro/see_plan.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ravand/pomodro/change_background.dart';
 import 'package:ravand/theme.dart';
+import 'package:wheel_chooser/wheel_chooser.dart';
 
 class PomodroPage extends StatefulWidget {
   const PomodroPage({super.key});
@@ -17,7 +18,11 @@ class PomodroPage extends StatefulWidget {
 class _PomodroPageState extends State<PomodroPage> {
   String bg = 'assets/bg1.jpg';
   double opacity = 0.3;
+  Timer? _timer;
+  Duration duration = const Duration(minutes: 25);
+  Duration initDuration = const Duration(minutes: 25);
   Timer? timer;
+  int wheelChooserValue = 25;
   @override
   void initState() {
     super.initState();
@@ -32,6 +37,70 @@ class _PomodroPageState extends State<PomodroPage> {
         bg = value.getString('bg') ?? bg;
       });
     });
+  }
+
+  String numberToPersian(String text) {
+    var listStr = text.split('');
+    var result = '';
+    var numbers = {
+      "0": "۰",
+      "1": "۱",
+      "2": "۲",
+      "3": "۳",
+      "4": "۴",
+      "5": "۵",
+      "6": "۶",
+      "7": "۷",
+      "8": "۸",
+      "9": "۹"
+    };
+
+    for (final s in listStr) {
+      if (numbers.keys.contains(s)) {
+        result = '$result${numbers[s]}';
+        continue;
+      }
+      result = '$result$s';
+    }
+
+    return result;
+  }
+
+  getTime(Duration duration) {
+    final min = duration.inMinutes;
+    final sec = duration.inSeconds - duration.inMinutes * 60;
+    var correctedMin = '$min';
+    var correctedSec = '$sec';
+    if (min.toString().length == 1) {
+      correctedMin = '0$min';
+    }
+    if (sec.toString().length == 1) {
+      correctedSec = '0$sec';
+    }
+    return numberToPersian('$correctedMin:$correctedSec');
+  }
+
+  void startTimer() {
+    const oneSec = Duration(seconds: 1);
+    _timer = Timer.periodic(
+      oneSec,
+      (Timer timer) {
+        print(duration.inSeconds);
+        if (duration.inSeconds >= 1) {
+          setState(() {
+            duration = Duration(seconds: duration.inSeconds - 1);
+          });
+        } else {
+          _timer?.cancel();
+        }
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -72,15 +141,24 @@ class _PomodroPageState extends State<PomodroPage> {
                           lightNord4.withOpacity(opacity),
                         ]),
                         shape: BoxShape.circle),
-                    child: const Center(
+                    child: Center(
                         child: Text(
-                      '۲۵:۰۰',
-                      style: TextStyle(fontSize: 60, color: Colors.white),
+                      getTime(duration),
+                      style: const TextStyle(fontSize: 60, color: Colors.white),
                     )),
                   ),
                   const Spacer(),
                   InkWell(
-                    onTap: () {},
+                    onTap: () {
+                      if (_timer?.isActive != true) {
+                        startTimer();
+                      } else {
+                        _timer?.cancel();
+                        setState(() {
+                          duration = initDuration;
+                        });
+                      }
+                    },
                     child: Container(
                       width: 200,
                       height: 60,
@@ -90,10 +168,10 @@ class _PomodroPageState extends State<PomodroPage> {
                             lightNord3.withOpacity(0.2),
                             lightNord4.withOpacity(0.2)
                           ])),
-                      child: const Center(
+                      child: Center(
                         child: Text(
-                          'شروع',
-                          style: TextStyle(
+                          _timer?.isActive != true ? 'شروع' : 'پایان',
+                          style: const TextStyle(
                               fontSize: 25,
                               color: Colors.white,
                               fontWeight: FontWeight.bold),
@@ -101,6 +179,34 @@ class _PomodroPageState extends State<PomodroPage> {
                       ),
                     ),
                   ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  if ((_timer?.isActive == true))
+                    InkWell(
+                      onTap: () {
+                        _timer?.cancel();
+                      },
+                      child: Container(
+                        width: 200,
+                        height: 60,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            gradient: LinearGradient(colors: [
+                              lightNord3.withOpacity(0.2),
+                              lightNord4.withOpacity(0.2)
+                            ])),
+                        child: const Center(
+                          child: Text(
+                            'توقف',
+                            style: TextStyle(
+                                fontSize: 25,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                    ),
                   const Spacer(),
                   Row(
                     mainAxisSize: MainAxisSize.min,
@@ -133,17 +239,58 @@ class _PomodroPageState extends State<PomodroPage> {
                       const SizedBox(
                         width: 30,
                       ),
-                      const Column(
-                        children: [
-                          Icon(Icons.settings, color: Colors.white),
-                          SizedBox(
-                            height: 5,
-                          ),
-                          Text(
-                            'تنظیمات',
-                            style: TextStyle(color: Colors.grey),
-                          )
-                        ],
+                      GestureDetector(
+                        onTap: () async {
+                          AlertDialog dialog = AlertDialog(
+                            title: const Text(
+                              'انتخاب زمان (دقیقه)',
+                              textAlign: TextAlign.center,
+                            ),
+                            titlePadding: const EdgeInsets.all(18),
+                            actionsAlignment: MainAxisAlignment.center,
+                            actions: [
+                              ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.pop(context, wheelChooserValue);
+                                  },
+                                  child: const Text('ثبت'))
+                            ],
+                            content: SizedBox(
+                                height: 50,
+                                width: 40,
+                                child: WheelChooser.integer(
+                                  onValueChanged: (v) {
+                                    wheelChooserValue = v;
+                                  },
+                                  initValue: wheelChooserValue,
+                                  maxValue: 900,
+                                  horizontal: true,
+                                  selectTextStyle: const TextStyle(
+                                      fontWeight: FontWeight.bold),
+                                  minValue: 5,
+                                  step: 5,
+                                )),
+                          );
+                          final result = await showDialog(
+                              context: context, builder: (_) => dialog);
+
+                          setState(() {
+                            initDuration = Duration(minutes: result ?? 25);
+                            duration = initDuration;
+                          });
+                        },
+                        child: const Column(
+                          children: [
+                            Icon(Icons.settings, color: Colors.white),
+                            SizedBox(
+                              height: 5,
+                            ),
+                            Text(
+                              'تنظیمات',
+                              style: TextStyle(color: Colors.grey),
+                            )
+                          ],
+                        ),
                       ),
                       const SizedBox(
                         width: 30,
